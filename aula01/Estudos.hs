@@ -1,6 +1,4 @@
--- ============================================
 -- EXEMPLOS BÁSICOS DE HASKELL
--- ============================================
 
 -- 1. FUNÇÕES SIMPLES
 -- Funções em Haskell são como funções matemáticas
@@ -19,7 +17,6 @@ soma a b = a + b
 -- Exemplo de uso (valores imutáveis)
 x = soma 3 5                 -- x sempre será 8
 y = dobro 10                 -- y sempre será 20
-
 
 -- 2. TRABALHANDO COM LISTAS
 -- Listas são estruturas fundamentais em Haskell
@@ -56,7 +53,6 @@ listaTransformada = map quadrado (filter (> 3) numeros)
 -- Pega numeros > 3: [4,5]
 -- Aplica quadrado: [16,25]
 
-
 -- 4. GUARDAS (alternativa ao if/else)
 -- Similar ao switch/case, mas mais expressivo
 
@@ -88,9 +84,8 @@ pares :: [Int]
 pares = [x | x <- [1..20], even x]  -- Apenas números pares
 
 
--- ============================================
 -- PROGRAMA PRINCIPAL (IO)
--- ============================================
+
 -- IO é necessário para entrada/saída
 -- O bloco 'do' permite sequenciar ações
 

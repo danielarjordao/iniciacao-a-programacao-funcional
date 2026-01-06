@@ -1,4 +1,5 @@
 import Data.Char (ord)
+import Data.Bool(not)
 
 numberPi :: Float
 numberPi = 3.14159
@@ -9,7 +10,7 @@ areaTriangulo :: Float -> Float -> Float
 areaTriangulo b h = (b * h) / 2
 
 g :: Char -> Bool
-g x = 20 <= ord x
+g x = not (20 > ord x)
 
 main :: IO ()
 main = do

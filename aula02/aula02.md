@@ -110,6 +110,3 @@ if condição then expressão1 else expressão2
 ```
 
 Aqui, se a `condição` for verdadeira, `expressão1` será avaliada; caso contrário, `expressão2` será avaliada.
-
-
-
