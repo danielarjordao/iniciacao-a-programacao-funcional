@@ -204,6 +204,330 @@ maiorde3 :: Int -> Int -> Int -> Int
 maiorde3 x y z = (maior ((maior (x, y)), z))
 ```
 
+### Definindo Valores Locais: `where` e `let...in`
+
+Em Haskell, existem duas formas principais de definir valores locais (variáveis auxiliares) dentro de uma função: usando **`where`** ou **`let...in`**.
+
+#### Cláusula `where`
+
+A cláusula `where` permite definir valores auxiliares **após** a expressão principal da função. É muito útil para tornar o código mais legível, evitando repetições.
+
+**Sintaxe:**
+```haskell
+nomefuncao argumentos = expressao
+    where
+        var1 = valor1
+        var2 = valor2
+        ...
+```
+
+**Exemplo:**
+```haskell
+-- Calcular área de um círculo
+areaCirculo :: Float -> Float
+areaCirculo r = pi * r2
+    where
+        r2 = r * r
+        pi = 3.14159
+```
+
+**Exemplo - ordenar três números:**
+```haskell
+ord3 :: (Int, Int, Int) -> (Int, Int, Int)
+ord3 (a, b, c) = (m1, m2, m3)
+    where
+        m1 = max a (max b c)  -- maior
+        m3 = min a (min b c)  -- menor
+        m2 = a + b + c - m1 - m3  -- médio
+```
+
+**Vantagens do `where`:**
+- As variáveis auxiliares aparecem depois da expressão principal
+- Útil quando a lógica principal é simples e as definições auxiliares são mais complexas
+- Permite definir múltiplas variáveis de forma clara
+- O escopo das variáveis abrange toda a definição da função (incluindo guards)
+
+#### Expressão `let...in`
+
+A expressão `let...in` permite definir valores auxiliares **antes** de usá-los na expressão final. É uma **expressão** (não apenas uma cláusula), então pode ser usada em qualquer lugar onde uma expressão é esperada.
+
+**Sintaxe:**
+```haskell
+let var1 = valor1
+    var2 = valor2
+    ...
+in expressao
+```
+
+**Exemplo:**
+```haskell
+-- Calcular área de um cilindro
+areaCilindro :: Float -> Float -> Float
+areaCilindro r h =
+    let areaBase = pi * r * r
+        areaLateral = 2 * pi * r * h
+    in 2 * areaBase + areaLateral
+```
+
+**Exemplo - maior e segundo maior de três números:**
+```haskell
+maior2 :: Int -> Int -> Int -> (Int, Int)
+maior2 x y z =
+    let m = max x (max y z)
+        s = if m == x then max y z
+            else if m == y then max x z
+            else max x y
+    in (m, s)
+```
+
+**Exemplo - `let` dentro de uma expressão:**
+```haskell
+-- Calcular hipotenusa
+hipotenusa :: Float -> Float -> Float
+hipotenusa a b = sqrt (let a2 = a * a
+                           b2 = b * b
+                       in a2 + b2)
+```
+
+**Vantagens do `let...in`:**
+- As definições aparecem antes do seu uso (ordem "top-down")
+- Pode ser usado dentro de outras expressões (guards, condicionais, etc.)
+- Útil quando você quer "construir" o resultado passo a passo
+- Permite definições muito localizadas
+
+#### Comparação: `where` vs `let...in`
+
+| Característica | `where` | `let...in` |
+|----------------|---------|------------|
+| Posição | Depois da expressão | Antes da expressão |
+| Tipo | Cláusula sintática | Expressão |
+| Escopo | Toda a função (incluindo guards) | Apenas a expressão do `in` |
+| Uso | No final da definição da função | Em qualquer lugar |
+| Legibilidade | Bom quando a expressão principal é simples | Bom quando há construção passo a passo |
+
+**Exemplo equivalente - mesma função com `where` e `let...in`:**
+
+```haskell
+-- Com where
+distancia1 :: (Float, Float) -> (Float, Float) -> Float
+distancia1 (x1, y1) (x2, y2) = sqrt (dx2 + dy2)
+    where
+        dx = x2 - x1
+        dy = y2 - y1
+        dx2 = dx * dx
+        dy2 = dy * dy
+
+-- Com let...in
+distancia2 :: (Float, Float) -> (Float, Float) -> Float
+distancia2 (x1, y1) (x2, y2) =
+    let dx = x2 - x1
+        dy = y2 - y1
+        dx2 = dx * dx
+        dy2 = dy * dy
+    in sqrt (dx2 + dy2)
+```
+
+**Quando usar cada um?**
+
+Use **`where`** quando:
+- A expressão principal é simples e auto-explicativa
+- As definições auxiliares são "suporte" para entender a função
+- Você quer que as variáveis estejam disponíveis em múltiplos guards
+
+Use **`let...in`** quando:
+- Você quer construir o resultado passo a passo
+- Precisa de definições locais dentro de expressões (guards, if-then-else)
+- Prefere ordem "top-down" (definir antes de usar)
+- Quer definições muito localizadas e específicas
+
+**Nota importante:** Ambas as formas são equivalentes em poder expressivo. A escolha é principalmente uma questão de estilo e legibilidade.
+
+### Pattern Matching com `case...of`
+
+A expressão `case...of` permite fazer **pattern matching** (correspondência de padrões) dentro de uma expressão. É similar ao uso de múltiplas equações de função, mas pode ser usado em qualquer lugar dentro do código.
+
+#### Sintaxe Básica
+
+```haskell
+case expressao of
+    padrao1 -> resultado1
+    padrao2 -> resultado2
+    ...
+    padraoN -> resultadoN
+```
+
+O Haskell avalia `expressao` e depois tenta fazer correspondência com cada padrão, de cima para baixo. Quando encontra um padrão compatível, retorna o resultado correspondente.
+
+#### Exemplo 1: Classificar Nota
+
+```haskell
+-- Classificar nota numérica
+classificaNota :: Int -> String
+classificaNota n = case n of
+    10 -> "Excelente"
+    9  -> "Muito Bom"
+    8  -> "Bom"
+    7  -> "Suficiente"
+    _  -> "Insuficiente"  -- _ captura qualquer valor
+```
+
+#### Exemplo 2: Pattern Matching em Listas
+
+```haskell
+-- Descrever tamanho da lista
+descreveLista :: [a] -> String
+descreveLista xs = case xs of
+    []      -> "Lista vazia"
+    [x]     -> "Lista com um elemento"
+    [x, y]  -> "Lista com dois elementos"
+    _       -> "Lista com vários elementos"
+```
+
+#### Exemplo 3: Pattern Matching em Tuplas
+
+```haskell
+-- Calcular operação baseada em tupla
+calculaOp :: (Char, Int, Int) -> Int
+calculaOp t = case t of
+    ('+', a, b) -> a + b
+    ('-', a, b) -> a - b
+    ('*', a, b) -> a * b
+    ('/', a, b) -> a `div` b
+    _           -> 0  -- operação desconhecida
+```
+
+#### Exemplo 4: Abreviar Nome (usando `case`)
+
+```haskell
+-- Versão com case...of
+abrev :: String -> String
+abrev nome =
+    let palavras = words nome
+    in case palavras of
+        []  -> ""
+        [x] -> x
+        _   -> head palavras ++ " " ++ last palavras
+```
+
+Este exemplo mostra como `case` pode ser útil quando você precisa fazer pattern matching em uma expressão calculada (neste caso, `words nome`).
+
+#### Exemplo 5: `case` Aninhado
+
+```haskell
+-- Descrever par de valores
+descreverPar :: (Int, Int) -> String
+descreverPar p = case p of
+    (0, 0) -> "Origem"
+    (0, y) -> case compare y 0 of
+        GT -> "Eixo Y positivo"
+        LT -> "Eixo Y negativo"
+        EQ -> "Origem"  -- já tratado acima, mas por completude
+    (x, 0) -> case compare x 0 of
+        GT -> "Eixo X positivo"
+        LT -> "Eixo X negativo"
+        EQ -> "Origem"
+    (x, y) -> "Ponto no plano"
+```
+
+#### Comparação: Múltiplas Equações vs `case...of`
+
+Estas duas definições são equivalentes:
+
+```haskell
+-- Com múltiplas equações (pattern matching direto)
+tamanho :: [a] -> String
+tamanho []  = "vazia"
+tamanho [x] = "um elemento"
+tamanho _   = "vários elementos"
+
+-- Com case...of
+tamanho' :: [a] -> String
+tamanho' lista = case lista of
+    []  -> "vazia"
+    [x] -> "um elemento"
+    _   -> "vários elementos"
+```
+
+#### Quando Usar `case...of`?
+
+Use **`case...of`** quando:
+- Precisa fazer pattern matching **dentro** de uma expressão (não na definição da função)
+- Quer fazer pattern matching em uma sub-expressão calculada
+- Tem pattern matching em conjunto com `let...in` ou `where`
+- Quer agrupar lógica de pattern matching em um único lugar
+
+Use **múltiplas equações** quando:
+- O pattern matching é na definição principal da função
+- Quer código mais limpo e direto
+- Cada caso pode ter lógica complexa independente
+
+#### Guards vs `case...of`
+
+**Guards** testam condições booleanas; **`case`** faz correspondência de padrões estruturais.
+
+```haskell
+-- Com guards (condições booleanas)
+classificaIdade :: Int -> String
+classificaIdade idade
+    | idade < 0  = "Inválido"
+    | idade < 13 = "Criança"
+    | idade < 18 = "Adolescente"
+    | otherwise  = "Adulto"
+
+-- Com case (padrões estruturais)
+primeiraCor :: [String] -> String
+primeiraCor cores = case cores of
+    []      -> "sem cor"
+    (c:_)   -> c
+```
+
+**Você pode combinar as duas abordagens:**
+
+```haskell
+processaLista :: [Int] -> String
+processaLista xs = case xs of
+    []     -> "vazia"
+    (x:_)  | x > 0     -> "começa positivo"
+           | x < 0     -> "começa negativo"
+           | otherwise -> "começa com zero"
+```
+
+#### Padrão `_` (wildcard)
+
+O underscore `_` é um padrão especial que corresponde a **qualquer valor** mas não o vincula a uma variável. Use quando não precisa do valor.
+
+```haskell
+-- Ignorar segundo elemento da tupla
+primeiro :: (a, b) -> a
+primeiro par = case par of
+    (x, _) -> x  -- não usamos o segundo elemento
+```
+
+#### Resumo
+
+| Característica | `case...of` |
+|----------------|-------------|
+| Tipo | Expressão |
+| Uso | Pattern matching em qualquer lugar |
+| Quando usar | Dentro de expressões, com valores calculados |
+| Equivalente | Múltiplas equações de função |
+| Combinável com | Guards, `let...in`, `where` |
+
+**Exemplo completo combinando tudo:**
+
+```haskell
+analisaLista :: [Int] -> String
+analisaLista xs =
+    let tamanho = length xs
+        soma = sum xs
+    in case xs of
+        [] -> "Lista vazia"
+        [x] -> "Um único elemento: " ++ show x
+        _  | soma > 100  -> "Soma grande: " ++ show soma
+           | tamanho > 10 -> "Lista longa: " ++ show tamanho ++ " elementos"
+           | otherwise    -> "Lista normal"
+```
+
 ## Módulos de Código Haskell
 
 ### O que é um Módulo?
