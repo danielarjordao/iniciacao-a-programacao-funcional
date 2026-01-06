@@ -22,7 +22,7 @@ Observar o mecanismo de inferência de tipos do Haskell e o polimorfismo das fun
 > - É como ligar um "modo de aprendizado" que mostra os tipos!
 
 #### 2. Função `fst` com tupla (Int, Char)
-```haskell
+```hask5.2ell
 > fst (4, 'a')
 ```
 **Resultado:** `4`
@@ -826,40 +826,43 @@ Escreva uma função que, dados três números inteiros, retorne um par contendo
 - Primeiro elemento: o maior dos números
 - Segundo elemento: o segundo maior dos números
 
-**Solução SIMPLIFICADA:**
+**Solução (usando max/min aninhados):**
 
 ```haskell
 maiorSegundoMaior :: Int -> Int -> Int -> (Int, Int)
-maiorSegundoMaior x y z
-    | maior == x = (x, max y z)
-    | maior == y = (y, max x z)
-    | otherwise  = (z, max x y)
-    where maior = max x (max y z)
+maiorSegundoMaior x y z = (max x (max y z), max (min x y) (max (min y z) (min x z)))
 ```
 
 > **Explicação detalhada:**
 >
-> **Estratégia mais simples:**
-> 1. Primeiro, encontra qual é o maior dos três
-> 2. Depois, encontra o maior dos dois restantes
+> **Estratégia usando apenas expressões:**
+> - Sem guards, sem where - tudo em uma linha!
+> - Usa apenas composição de `max` e `min`
 >
-> **Função `max`:**
-> - `max :: Ord a => a -> a -> a`
-> - Retorna o maior entre dois valores
-> - Exemplo: `max 5 3` → `5`
+> **Como funciona:**
+> - **Primeiro elemento (maior):** `max x (max y z)`
+>   - Compara x com o máximo entre y e z
+>   - Retorna o maior dos três
 >
-> **Passo a passo:**
-> - `maior = max x (max y z)` - encontra o maior dos três
->   - Primeiro calcula `max y z`
->   - Depois compara resultado com `x`
-> - Se `maior == x`, o segundo maior é `max y z`
-> - Se `maior == y`, o segundo maior é `max x z`
-> - Se `maior == z`, o segundo maior é `max x y`
+> - **Segundo elemento (segundo maior):** `max (min x y) (max (min y z) (min x z))`
+>   - `min x y` - menor entre x e y
+>   - `min y z` - menor entre y e z
+>   - `min x z` - menor entre x e z
+>   - Pega o máximo entre esses três mínimos
+>   - O máximo dos mínimos de pares = segundo maior!
+>
+> **Por que funciona?**
+> - Se temos 3 números, os "mínimos de pares" são:
+>   - O menor geral aparece em todos os pares
+>   - O médio aparece em alguns pares
+>   - O maior não aparece como mínimo
+> - O máximo desses mínimos = o valor do meio!
 >
 > **Por que é mais simples?**
-> - Usa apenas 3 guards em vez de 6
-> - Usa função `max` que é pré-definida
-> - Lógica mais clara: "acha o maior, depois acha o maior do resto"
+> - Sem guards (apenas expressão)
+> - Sem where (sem variáveis auxiliares)
+> - Apenas composição de funções pré-definidas
+> - Mais conciso e funcional
 
 **Exemplos de uso:**
 
@@ -895,39 +898,36 @@ maiorSegundoMaior 5 3 8
 **Enunciado:**
 Escreva uma função que receba um triplo de números inteiros e retorne um triplo em que os mesmos números estão ordenados por ordem decrescente.
 
-**Solução SIMPLIFICADA:**
+**Solução (inline, sem where):**
 
 ```haskell
 ordenaTriplo :: (Int, Int, Int) -> (Int, Int, Int)
-ordenaTriplo (x, y, z) = (maior, medio, menor)
-    where
-        maior = max x (max y z)
-        menor = min x (min y z)
-        medio = x + y + z - maior - menor
+ordenaTriplo (x, y, z) = (max x (max y z), x + y + z - max x (max y z) - min x (min y z), min x (min y z))
 ```
 
 > **Explicação detalhada:**
 >
-> **Estratégia mais simples:**
-> 1. Encontra o maior dos três usando `max`
-> 2. Encontra o menor dos três usando `min`
-> 3. Calcula o médio: soma total menos maior e menor
+> **Estratégia inline (tudo em uma expressão):**
+> 1. Calcula o maior diretamente na tupla
+> 2. Calcula o menor diretamente na tupla
+> 3. Calcula o médio usando o truque matemático inline
 >
 > **Funções usadas:**
 > - `max :: Ord a => a -> a -> a` - retorna o maior entre dois valores
 > - `min :: Ord a => a -> a -> a` - retorna o menor entre dois valores
 >
 > **Como funciona:**
-> - `maior = max x (max y z)` - compara x com o máximo entre y e z
-> - `menor = min x (min y z)` - compara x com o mínimo entre y e z
-> - `medio = x + y + z - maior - menor` - truque matemático!
->   - Se temos 3 números, a soma de todos menos os extremos = o do meio
+> - **Primeiro elemento (maior):** `max x (max y z)` - compara x com o máximo entre y e z
+> - **Terceiro elemento (menor):** `min x (min y z)` - compara x com o mínimo entre y e z
+> - **Segundo elemento (médio):** `x + y + z - max x (max y z) - min x (min y z)`
+>   - Truque matemático: soma total menos os extremos = o do meio
+>   - Repete o cálculo de maior e menor inline (sem armazenar)
 >
 > **Por que é mais simples?**
-> - Não precisa de guards complexos
+> - Sem where (sem variáveis auxiliares)
+> - Tudo calculado diretamente na tupla resultado
 > - Usa funções pré-definidas (`max` e `min`)
-> - Truque matemático elegante para achar o médio
-> - Mais curto e legível
+> - Mais conciso e direto
 
 **Exemplos de uso:**
 
@@ -1042,13 +1042,11 @@ Funções úteis:
 - `words :: String -> [String]` - divide texto em lista de palavras
 - `unwords :: [String] -> String` - junta lista de palavras em texto
 
-**Solução:**
+**Solução SIMPLIFICADA (com if-then-else):**
 
 ```haskell
 abrev :: String -> String
-abrev nome
-    | length palavras == 1 = head palavras
-    | otherwise = head palavras ++ " " ++ last palavras
+abrev nome = if length palavras == 1 then head palavras else head palavras ++ " " ++ last palavras
     where palavras = words nome
 ```
 
@@ -1061,11 +1059,16 @@ abrev nome
 > - `palavras = words nome` - cria variável local com a lista de palavras
 > - Evita chamar `words nome` múltiplas vezes, tornando o código mais eficiente
 >
-> **Guards (condições):**
-> - `| length palavras == 1` - se só tem uma palavra no nome
->   - `= head palavras` - retorna essa palavra (ex: "Maria" → "Maria")
-> - `| otherwise` - caso contrário (2 ou mais palavras)
->   - `= head palavras ++ " " ++ last palavras` - retorna primeira e última
+> **Expressão condicional (if-then-else):**
+> - `if length palavras == 1` - condição: se só tem uma palavra
+> - `then head palavras` - retorna essa palavra (ex: "Maria" → "Maria")
+> - `else head palavras ++ " " ++ last palavras` - retorna primeira e última
+>
+> **Por que if-then-else em vez de guards?**
+> - Mais conciso para condições simples (apenas 2 casos)
+> - Tudo em uma linha (exceto o where)
+> - Guards são melhores quando há 3+ condições
+> - if-then-else é uma expressão (pode ser usada em qualquer lugar)
 >
 > **Funções usadas:**
 > - `words nome` - divide o nome em lista de palavras

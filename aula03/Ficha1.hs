@@ -24,32 +24,29 @@ somaEProduto :: (Int, Int) -> (Int, Int) -> (Int, Int)
 somaEProduto (a, b) (c, d) = (a + c, b * d)
 
 -- Exercício 2: Maior e Segundo Maior
--- Usa funções auxiliares max e min
+-- Usa funções auxiliares max e min de forma aninhada
 -- Tipo: Int -> Int -> Int -> (Int, Int)
 -- Exemplo: maiorSegundoMaior 5 3 8 = (8, 5)
 maiorSegundoMaior :: Int -> Int -> Int -> (Int, Int)
-maiorSegundoMaior x y z
-    | maior == x = (x, max y z)  -- se x é o maior, segundo maior é max entre y e z
-    | maior == y = (y, max x z)  -- se y é o maior, segundo maior é max entre x e z
-    | otherwise  = (z, max x y)  -- se z é o maior, segundo maior é max entre x e y
-    where maior = max x (max y z)  -- encontra o maior dos três
-    -- max: retorna o maior entre dois valores
-    -- max x (max y z): primeiro acha max(y,z), depois max(x, resultado)
+maiorSegundoMaior x y z = (max x (max y z), max (min x y) (max (min y z) (min x z)))
+    -- Maior: max x (max y z) - compara x com o máximo entre y e z
+    -- Segundo maior: max entre os três mínimos possíveis de pares
+    -- Lógica: o segundo maior é o máximo entre:
+    --   - min x y (menor entre x e y)
+    --   - min y z (menor entre y e z)
+    --   - min x z (menor entre x e z)
+    -- Combinados: max (min x y) (max (min y z) (min x z))
 
 -- Exercício 3: Ordenar Triplo Decrescente
--- Usa max e min para ordenar
+-- Usa max e min para ordenar de forma direta
 -- Tipo: (Int, Int, Int) -> (Int, Int, Int)
 -- Exemplo: ordenaTriplo (5, 2, 8) = (8, 5, 2)
 ordenaTriplo :: (Int, Int, Int) -> (Int, Int, Int)
-ordenaTriplo (x, y, z) = (maior, medio, menor)
-    where
-        maior = max x (max y z)  -- o maior dos três
-        menor = min x (min y z)  -- o menor dos três
-        medio = x + y + z - maior - menor  -- o do meio é a soma menos maior e menor
+ordenaTriplo (x, y, z) = (max x (max y z), x + y + z - max x (max y z) - min x (min y z), min x (min y z))
     -- Lógica:
-    -- - maior: compara x com o máximo entre y e z
-    -- - menor: compara x com o mínimo entre y e z
-    -- - médio: soma total menos os extremos = o que sobra no meio
+    -- - maior: max x (max y z) - compara x com o máximo entre y e z
+    -- - menor: min x (min y z) - compara x com o mínimo entre y e z
+    -- - médio: soma total menos os extremos = o que sobra no meio (x + y + z - maior - menor)
 
 
 -- Exercício 4: Validação de Triângulo
@@ -74,11 +71,10 @@ trianguloValido a b c = (a + b > c) && (a + c > b) && (b + c > a)
 -- Exemplo: abrev "Joao Carlos Martins Sarmento" = "Joao Sarmento"
 -- Trata corretamente o caso de nome único (não repete)
 abrev :: String -> String
-abrev nome
-    | length palavras == 1 = head palavras              -- só 1 nome, retorna ele
-    | otherwise = head palavras ++ " " ++ last palavras -- primeiro + último
+abrev nome = if length palavras == 1 then head palavras else head palavras ++ " " ++ last palavras
     where palavras = words nome
     -- words: divide o texto em lista de palavras
+    -- if-then-else: expressão condicional
     -- length: conta quantas palavras tem
     -- head: pega primeira palavra
     -- last: pega última palavra
