@@ -888,7 +888,7 @@ maiorSegundoMaior 5 3 8
 
 > maiorSegundoMaior 1 2 3
 (3, 2)
----
+```
 
 ### Exercício 3: Ordenar Triplo Decrescente
 
@@ -1215,12 +1215,6 @@ Após criar o arquivo `Ficha1.hs` com todas as funções:
 > trianguloValido 3 4 5
 > abrev "Ana Maria Santos"
 ```
-
-## Notas e Observações
-
-- Sempre use `:set +t` no início para facilitar o aprendizado
-- Experimente os comandos com diferentes tipos de dados
-- Preste atenção nas mensagens de erro - elas ensinam muito!
 
 ## Tarefa 5 - Importação de Módulos
 
