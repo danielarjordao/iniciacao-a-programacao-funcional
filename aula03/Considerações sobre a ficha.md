@@ -31,11 +31,11 @@ Mostra o tipo de cada expressão avaliada
 
 Para voltar ao comportamento normal, fazer: **:set -t**
 
-**O que significa it:: Char?**
+## **O que significa it:: Char?**
 
 O `it :: Char` indica que o valor devolvido e guardado temporariamente pelo GHCi é do tipo `Char`.
 
-**O que significa Num a :: a -\> a ?**
+## **O que significa Num a :: a -\> a ?**
 
 O tipo `a` tem de pertencer à classe `Num`, logo estar Num a. A isto chama-se restrição de tipos.
 
