@@ -204,6 +204,205 @@ maiorde3 :: Int -> Int -> Int -> Int
 maiorde3 x y z = (maior ((maior (x, y)), z))
 ```
 
+### Expressões Condicionais: `if-then-else`
+
+Em Haskell, `if-then-else` é uma **expressão** (não um comando como em outras linguagens). Isso significa que sempre retorna um valor e pode ser usada em qualquer lugar onde uma expressão é esperada.
+
+#### Sintaxe Básica
+
+```haskell
+if condicao then expressao1 else expressao2
+```
+
+**Características importantes:**
+- `condicao` deve ser do tipo `Bool` (True ou False)
+- `expressao1` e `expressao2` devem ter o **mesmo tipo**
+- O `else` é **obrigatório** (não existe `if` sem `else`)
+- Retorna `expressao1` se `condicao` for `True`, senão retorna `expressao2`
+
+#### Exemplo 1: Valor Absoluto
+
+```haskell
+absoluto :: Int -> Int
+absoluto x = if x >= 0 then x else (-x)
+```
+
+**Avaliação:**
+```haskell
+absoluto 5    ⇒ if 5 >= 0 then 5 else (-5)  ⇒ 5
+absoluto (-3) ⇒ if (-3) >= 0 then (-3) else 3  ⇒ 3
+```
+
+#### Exemplo 2: Sinal de um Número
+
+```haskell
+sinal :: Int -> String
+sinal x = if x > 0 then "positivo" else "não positivo"
+```
+
+#### Exemplo 3: Dentro de Expressões
+
+Como `if-then-else` é uma expressão, pode ser usado dentro de outras expressões:
+
+```haskell
+-- Calcular desconto
+precoFinal :: Float -> Float
+precoFinal preco = preco * if preco > 100 then 0.9 else 1.0
+
+-- Em operações aritméticas
+maximo :: Int -> Int -> Int
+maximo a b = if a > b then a else b
+
+resultado :: Int -> Int -> Int
+resultado x y = (if x > 0 then x else 0) + (if y > 0 then y else 0)
+```
+
+#### `if-then-else` Aninhado (else if)
+
+Para testar múltiplas condições, você pode aninhar `if-then-else`:
+
+```haskell
+classificaNota :: Int -> String
+classificaNota nota =
+    if nota >= 9 then "Excelente"
+    else if nota >= 7 then "Bom"
+    else if nota >= 5 then "Suficiente"
+    else "Insuficiente"
+```
+
+**Avaliação passo a passo:**
+```haskell
+classificaNota 8
+⇒ if 8 >= 9 then "Excelente"
+  else if 8 >= 7 then "Bom"
+  else if 8 >= 5 then "Suficiente"
+  else "Insuficiente"
+⇒ if False then "Excelente"
+  else if 8 >= 7 then "Bom" ...
+⇒ if 8 >= 7 then "Bom"
+  else if 8 >= 5 then "Suficiente"
+  else "Insuficiente"
+⇒ if True then "Bom" ...
+⇒ "Bom"
+```
+
+**Outro exemplo - calculadora simples:**
+```haskell
+calcula :: Char -> Int -> Int -> Int
+calcula op a b =
+    if op == '+' then a + b
+    else if op == '-' then a - b
+    else if op == '*' then a * b
+    else if op == '/' then a `div` b
+    else 0  -- operador inválido
+```
+
+#### Comparação com Guards
+
+`if-then-else` aninhado pode ficar verboso. Em Haskell, **guards** são geralmente preferidos para múltiplas condições:
+
+```haskell
+-- Com if-then-else aninhado (mais verboso)
+classificaNota1 :: Int -> String
+classificaNota1 nota =
+    if nota >= 9 then "Excelente"
+    else if nota >= 7 then "Bom"
+    else if nota >= 5 then "Suficiente"
+    else "Insuficiente"
+
+-- Com guards (mais limpo)
+classificaNota2 :: Int -> String
+classificaNota2 nota
+    | nota >= 9 = "Excelente"
+    | nota >= 7 = "Bom"
+    | nota >= 5 = "Suficiente"
+    | otherwise = "Insuficiente"
+```
+
+#### Quando Usar `if-then-else`?
+
+Use **`if-then-else`** quando:
+- Tem apenas **duas** alternativas simples
+- Precisa de uma expressão condicional **dentro** de outra expressão
+- A condição e os resultados são curtos e diretos
+
+**Exemplos apropriados:**
+```haskell
+max2 :: Int -> Int -> Int
+max2 a b = if a > b then a else b
+
+parOuImpar :: Int -> String
+parOuImpar n = if even n then "par" else "ímpar"
+
+ajustaValor :: Int -> Int
+ajustaValor x = (if x < 0 then 0 else x) + 10
+```
+
+Use **guards** quando:
+- Tem **múltiplas** condições (3 ou mais)
+- As condições são complexas
+- Quer código mais legível para casos múltiplos
+
+Use **`case...of`** quando:
+- Precisa fazer pattern matching estrutural
+- Trabalha com tipos de dados algébricos
+
+#### `if-then-else` com `let...in`
+
+Você pode combinar `if-then-else` com `let...in`:
+
+```haskell
+-- Calcular segundo maior de três números
+segundoMaior :: Int -> Int -> Int -> Int
+segundoMaior x y z =
+    let m = max x (max y z)
+        s = if m == x then max y z
+            else if m == y then max x z
+            else max x y
+    in s
+```
+
+#### Erros Comuns
+
+**ERRO: Esquecer o `else`**
+```haskell
+-- ERRADO - não compila!
+teste x = if x > 0 then "positivo"
+
+-- CORRETO
+teste x = if x > 0 then "positivo" else "não positivo"
+```
+
+**ERRO: Tipos diferentes no `then` e `else`**
+```haskell
+-- ERRADO - tipos incompatíveis!
+teste x = if x > 0 then "positivo" else 0
+
+-- CORRETO - mesmo tipo
+teste x = if x > 0 then "positivo" else "zero ou negativo"
+```
+
+**ERRO: Usar `if` como statement (comando)**
+```haskell
+-- ERRADO - if é expressão, não comando
+teste x =
+    if x > 0
+        print "positivo"  -- ERRO!
+
+-- Em Haskell, use do-notation para IO (veremos mais tarde)
+```
+
+#### Resumo
+
+| Característica | `if-then-else` |
+|----------------|----------------|
+| Tipo | Expressão |
+| Condição | Deve ser `Bool` |
+| `else` | Obrigatório |
+| Tipos | `then` e `else` devem ter mesmo tipo |
+| Uso | Simples alternativas, dentro de expressões |
+| Alternativa | Guards (para múltiplas condições) |
+
 ### Definindo Valores Locais: `where` e `let...in`
 
 Em Haskell, existem duas formas principais de definir valores locais (variáveis auxiliares) dentro de uma função: usando **`where`** ou **`let...in`**.
