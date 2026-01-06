@@ -297,20 +297,140 @@ calcula op a b =
     else 0  -- operador inválido
 ```
 
-#### Comparação com Guards
+### Guardas (Guards): Condições com `|` e `otherwise`
 
-`if-then-else` aninhado pode ficar verboso. Em Haskell, **guards** são geralmente preferidos para múltiplas condições:
+**Guards** (guardas) são uma forma elegante de escrever funções com múltiplas condições. Usam o símbolo `|` (pipe) seguido de uma expressão booleana.
+
+#### Sintaxe Básica
 
 ```haskell
--- Com if-then-else aninhado (mais verboso)
+nomeFuncao argumentos
+    | condicao1 = resultado1
+    | condicao2 = resultado2
+    | condicao3 = resultado3
+    | otherwise = resultadoPadrao
+```
+
+**Como funciona:**
+- Cada `|` marca uma "guarda" (condição)
+- Haskell testa as condições **de cima para baixo**
+- Retorna o resultado da **primeira** condição verdadeira
+- `otherwise` é equivalente a `True` - usado como caso padrão (sempre verdadeiro)
+
+#### Exemplo 1: Classificação de Nota
+
+```haskell
+classificaNota :: Int -> String
+classificaNota nota
+    | nota >= 9 = "Excelente"
+    | nota >= 7 = "Bom"
+    | nota >= 5 = "Suficiente"
+    | otherwise = "Insuficiente"
+```
+
+**Avaliação passo a passo:**
+```haskell
+classificaNota 8
+-- Testa: 8 >= 9? Não
+-- Testa: 8 >= 7? Sim! Retorna "Bom"
+⇒ "Bom"
+
+classificaNota 4
+-- Testa: 4 >= 9? Não
+-- Testa: 4 >= 7? Não
+-- Testa: 4 >= 5? Não
+-- otherwise? Sim (sempre True)
+⇒ "Insuficiente"
+```
+
+#### O que é `otherwise`?
+
+`otherwise` é simplesmente um **sinônimo** para `True` definido no Prelude:
+
+```haskell
+otherwise :: Bool
+otherwise = True
+```
+
+É usado por convenção como a **última guarda**, garantindo que sempre haverá uma alternativa final. Poderia ser substituído por `True`, mas `otherwise` é mais legível.
+
+```haskell
+-- Essas duas funções são equivalentes
+f1 x | x > 0     = "positivo"
+     | otherwise = "não positivo"
+
+f2 x | x > 0 = "positivo"
+     | True  = "não positivo"  -- funciona, mas otherwise é mais claro
+```
+
+#### Exemplo 2: Sinal de um Número
+
+```haskell
+sinal :: Int -> String
+sinal n
+    | n > 0     = "positivo"
+    | n < 0     = "negativo"
+    | otherwise = "zero"
+```
+
+#### Exemplo 3: IMC (Índice de Massa Corporal)
+
+```haskell
+imc :: Float -> Float -> String
+imc peso altura
+    | resultado < 18.5 = "Abaixo do peso"
+    | resultado < 25.0 = "Peso normal"
+    | resultado < 30.0 = "Sobrepeso"
+    | otherwise        = "Obesidade"
+    where resultado = peso / (altura ^ 2)
+```
+
+Aqui combinamos **guards** com **where** - muito comum em Haskell!
+
+#### Exemplo 4: Máximo de Três Números
+
+```haskell
+max3 :: Int -> Int -> Int -> Int
+max3 a b c
+    | a >= b && a >= c = a
+    | b >= c           = b
+    | otherwise        = c
+```
+
+#### Guards vs `if-then-else` vs `if-then-else if`
+
+Vamos comparar as três formas de escrever condicionais em Haskell:
+
+**Forma 1: `if-then-else` simples (2 condições)**
+
+```haskell
+absoluto1 :: Int -> Int
+absoluto1 x = if x >= 0 then x else (-x)
+```
+
+- Bom para: **2 alternativas simples**
+- Conciso e direto
+- Limitação: Só funciona bem com duas opções
+
+**Forma 2: `if-then-else if-then-else` aninhado (múltiplas condições)**
+
+```haskell
 classificaNota1 :: Int -> String
 classificaNota1 nota =
     if nota >= 9 then "Excelente"
     else if nota >= 7 then "Bom"
     else if nota >= 5 then "Suficiente"
     else "Insuficiente"
+```
 
--- Com guards (mais limpo)
+- Funciona para múltiplas condições
+- Desvantagem: Verboso - muito `else if`
+- Desvantagem: Menos legível com muitas condições
+- Desvantagem: Indentação pode ficar confusa
+
+**Forma 3: Guards com `|` e `otherwise` (múltiplas condições)**
+
+```haskell
 classificaNota2 :: Int -> String
 classificaNota2 nota
     | nota >= 9 = "Excelente"
@@ -318,6 +438,108 @@ classificaNota2 nota
     | nota >= 5 = "Suficiente"
     | otherwise = "Insuficiente"
 ```
+
+- **Mais limpo** para múltiplas condições
+- Mais legível - cada condição em sua linha
+- Alinhamento vertical facilita leitura
+- `otherwise` deixa claro o caso padrão
+- Idiomático em Haskell (forma preferida)
+
+#### Comparação Lado a Lado
+
+Vamos implementar a mesma função das três formas:
+
+```haskell
+-- Tarifa de taxi baseada na distância
+
+-- Forma 1: if-then-else simples (só 2 opções - limitado!)
+tarifa1 :: Float -> Float
+tarifa1 km = if km <= 5 then 10.0 else 10.0 + (km - 5) * 2.0
+
+-- Forma 2: if-then-else aninhado
+tarifa2 :: Float -> Float
+tarifa2 km =
+    if km <= 5 then 10.0
+    else if km <= 15 then 10.0 + (km - 5) * 2.0
+    else if km <= 30 then 30.0 + (km - 15) * 1.5
+    else 52.5 + (km - 30) * 1.0
+
+-- Forma 3: Guards (MAIS LIMPO!)
+tarifa3 :: Float -> Float
+tarifa3 km
+    | km <= 5   = 10.0
+    | km <= 15  = 10.0 + (km - 5) * 2.0
+    | km <= 30  = 30.0 + (km - 15) * 1.5
+    | otherwise = 52.5 + (km - 30) * 1.0
+```
+
+#### Quando Usar Cada Forma?
+
+| Situação | Usar |
+|----------|------|
+| **2 alternativas simples** | `if-then-else` |
+| **Expressão dentro de outra expressão** | `if-then-else` |
+| **3+ condições booleanas** | **Guards** (`\|` e `otherwise`) |
+| **Lógica clara e legível** | **Guards** |
+| **Pattern matching estrutural** | `case...of` |
+
+#### Guards com Expressões Complexas
+
+Você pode usar qualquer expressão booleana nas guards:
+
+```haskell
+-- Pode usar funções, operadores, etc.
+descreveNum :: Int -> String
+descreveNum n
+    | even n && n > 0  = "par positivo"
+    | odd n && n > 0   = "ímpar positivo"
+    | n == 0           = "zero"
+    | otherwise        = "negativo"
+
+-- Pode chamar funções auxiliares
+podeVotar :: Int -> String
+podeVotar idade
+    | ehMenor idade    = "Não pode votar"
+    | ehIdoso idade    = "Voto facultativo"
+    | otherwise        = "Voto obrigatório"
+    where
+        ehMenor i = i < 16
+        ehIdoso i = i >= 70
+```
+
+#### Importante: Ordem das Guards
+
+A **ordem importa**! Haskell testa de cima para baixo e retorna na **primeira** condição verdadeira.
+
+```haskell
+-- ERRADO - ordem ruim!
+classificaMal :: Int -> String
+classificaMal nota
+    | nota >= 0 = "Pelo menos zero"  -- sempre pega primeiro!
+    | nota >= 5 = "Suficiente"       -- nunca alcançado
+    | nota >= 7 = "Bom"              -- nunca alcançado
+    | otherwise = "Negativo"
+
+-- CORRETO - do mais específico ao mais geral
+classificaBem :: Int -> String
+classificaBem nota
+    | nota >= 9 = "Excelente"
+    | nota >= 7 = "Bom"
+    | nota >= 5 = "Suficiente"
+    | nota >= 0 = "Insuficiente"
+    | otherwise = "Nota inválida"
+```
+
+#### Resumo: Guards
+
+| Característica | Guards |
+|----------------|--------|
+| Sintaxe | `\| condicao = resultado` |
+| Caso padrão | `otherwise` (equivalente a `True`) |
+| Ordem | Testa de cima para baixo |
+| Uso ideal | 3+ condições booleanas |
+| Legibilidade | Excelente para múltiplas condições |
+| Combinável com | `where`, `let...in`, pattern matching |
 
 #### Quando Usar `if-then-else`?
 
