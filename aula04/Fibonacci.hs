@@ -1,9 +1,7 @@
-import Distribution.Simple.Test (test)
-import Control.Monad.RWS (MonadState(put))
 {-
     Fazer a sequência de Fibonacci com recursividade em Haskell sem utilizar inteligência artificial.
 
-    fib 0 = 1
+    fib 0 = 0
     fib 1 = 1
     fib n = fib (n-1) + fib (n-2)
 
@@ -102,7 +100,7 @@ main = do
     - putStrLn $ "fib 0: " ++ show (fib 0)
       é equivalente a
       putStrLn ("fib 0: " ++ show (fib 0))
-      
+
     Exemplo completo:
     putStrLn $ "fib 0: " ++ show (fib 0)
     1. fib 0 calcula o valor: 0
