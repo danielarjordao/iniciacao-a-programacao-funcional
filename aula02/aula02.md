@@ -97,9 +97,9 @@ Neste exemplo, a função `factorial` é definida de forma recursiva, onde o cas
 -- Exemplo: `x :: Int` indica que `x` é do tipo inteiro.
 -- Exemplo: `f :: Int -> Bool` indica que `f` é uma função que recebe um inteiro e retorna um booleano.
 - Listas são representadas entre colchetes, por exemplo: `[1, 2, 3]`.
--- `Lista de int`: Lista de números inteiros.
+  - `Lista de int`: Lista de números inteiros.
 - Tuplas são representadas entre parênteses, por exemplo: `(1, 'a')`.
--- `Par (Int, Char)`: Tupla contendo um inteiro e um caractere.
+  - `Par (Int, Char)`: Tupla contendo um inteiro e um caractere.
 
 ### Condicionais
 

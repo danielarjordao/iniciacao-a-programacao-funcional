@@ -1,0 +1,3 @@
+# Artefatos de compilação Haskell (como vistos nas aulas)
+*.o
+*.hi

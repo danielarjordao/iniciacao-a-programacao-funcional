@@ -22,7 +22,7 @@ Observar o mecanismo de inferência de tipos do Haskell e o polimorfismo das fun
 > - É como ligar um "modo de aprendizado" que mostra os tipos!
 
 #### 2. Função `fst` com tupla (Int, Char)
-```hask5.2ell
+```haskell
 > fst (4, 'a')
 ```
 **Resultado:** `4`

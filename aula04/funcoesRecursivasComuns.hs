@@ -5,18 +5,18 @@
     - zipWith
 -}
 
--- take: Retorna os primeiros n elementos de uma listaInt
+-- take: Retorna os primeiros n elementos de uma lista
 primeirosDois :: [a] -> [a] -- Função genérica que funciona para qualquer tipo de lista
 primeirosDois = take 2  -- Retorna os primeiros 2 elementos da lista
 
 primeirosTres :: [a] -> [a] -- Função genérica que funciona para qualquer tipo de lista
 primeirosTres = take 3  -- Retorna os primeiros 3 elementos da lista
 
--- tail: Retorna a listaInt sem o primeiro elemento
+-- tail: Retorna a lista sem o primeiro elemento
 listaSemPrimeiro :: [a] -> [a]
 listaSemPrimeiro = tail  -- Retorna a lista sem o primeiro elemento
 
--- zipWith: Combina duas listaInts aplicando uma função aos elementos correspondentes
+-- zipWith: Combina duas listas aplicando uma função aos elementos correspondentes
 somaListas :: [Int] -> [Int] -> [Int]
 somaListas = zipWith (+)  -- Soma os elementos correspondentes de duas listas
 
