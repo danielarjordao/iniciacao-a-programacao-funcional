@@ -92,6 +92,80 @@ Vamos analisar os exemplos do enunciado:
 -- Só pode usar constantes literais, não cálculos
 ```
 
+### Padrões n+k (com Números Naturais)
+
+**NOTA IMPORTANTE**: Haskell aceita como padrões sobre números naturais expressões da forma `(variável + número natural)`.
+
+**Como funciona:**
+- O padrão `(n+k)` só concorda com números **não inferiores** a `k`
+- Por exemplo: `(x+3)` concorda com 3, 4, 5, 6, ... mas **não** concorda com 0, 1 ou 2
+- Quando há concordância, a variável recebe o valor **subtraindo** k do número
+
+**Padrões n+k válidos:**
+```haskell
+(n+1)    -- concorda com números >= 1, n recebe o valor menos 1
+(x+3)    -- concorda com números >= 3, x recebe o valor menos 3
+(k+10)   -- concorda com números >= 10, k recebe o valor menos 10
+```
+
+**Padrões n+k INVÁLIDOS:**
+```haskell
+(n*5)    -- ERRO: só aceita adição, não multiplicação
+(x-4)    -- ERRO: só aceita adição, não subtração
+(2+n)    -- ERRO: a variável deve vir primeiro
+```
+
+**Por que esses não funcionam?** Porque Haskell só permite padrões da forma `(variável + constante)`, com a variável à esquerda e soma à direita.
+
+**Exemplo: Fatorial com padrão n+k**
+
+```haskell
+-- Versão tradicional
+fatorial :: Integer -> Integer
+fatorial 0 = 1
+fatorial n = n * fatorial (n-1)
+
+-- Versão com padrão n+k
+fatorial :: Integer -> Integer
+fatorial 0     = 1
+fatorial (n+1) = (n+1) * fatorial n
+```
+
+**Como funciona:**
+```haskell
+fatorial 3
+-- Testa 1ª equação: 3 = 0? ✗
+-- Testa 2ª equação: 3 concorda com (n+1)?
+--   3 >= 1? ✓ Sim! Logo n = 3 - 1 = 2
+-- Usa 2ª equação: (n+1) * fatorial n = 3 * fatorial 2
+⇒ 3 * fatorial 2
+⇒ 3 * (2 * fatorial 1)
+⇒ 3 * (2 * (1 * fatorial 0))
+⇒ 3 * (2 * (1 * 1))
+⇒ 6
+```
+
+**CUIDADO**: Note que esta versão deixa de estar definida para números **negativos**!
+
+```haskell
+fatorial (-1)
+-- Testa 1ª equação: -1 = 0? ✗
+-- Testa 2ª equação: -1 concorda com (n+1)?
+--   -1 >= 1? ✗ Não!
+-- Nenhuma equação concorda!
+⇒ ERRO: Non-exhaustive patterns
+```
+
+**Recomendação moderna**: Padrões n+k são considerados uma feature **legada** do Haskell e podem ser desabilitados com a extensão `{-# LANGUAGE NoNPlusKPatterns #-}`. Na prática moderna, prefere-se usar guardas:
+
+```haskell
+fatorial :: Integer -> Integer
+fatorial n
+    | n == 0    = 1
+    | n > 0     = n * fatorial (n-1)
+    | otherwise = error "fatorial de número negativo"
+```
+
 ### Exemplos de Funções com Padrões
 
 ```haskell
@@ -339,8 +413,187 @@ g (x, 'a') = x           -- retorna o tipo de x (genérico)
 g (x, _)   = "erro"      -- retorna String
 -- ERRO: não pode retornar ora 'a', ora String
 ```
+## 4. Guardas (Guards) - Alternativa ao Pattern Matching
 
-## 4. Listas: Construtores e Padrões
+### O que são Guardas?
+
+Em Haskell é possível definir funções com alternativas usando **guardas**. Uma **guarda** é uma **expressão booleana**. Se o seu valor for `True`, a equação correspondente será usada na redução (senão o interpretador tenta utilizar a equação seguinte).
+
+Guardas são úteis quando você quer testar **condições** em vez de **padrões estruturais**.
+
+### Sintaxe das Guardas
+
+```haskell
+nomeFuncao argumentos
+    | condicao1 = resultado1
+    | condicao2 = resultado2
+    | condicao3 = resultado3
+    | otherwise = resultadoPadrao
+```
+
+- O símbolo `|` (pipe) marca cada guarda
+- Após `|` vem uma expressão booleana (a condição)
+- `otherwise` é equivalente a `True` (caso padrão)
+
+### Exemplo: Três Formas de Definir a Mesma Função
+
+Vejamos a função `sig` que retorna o sinal de `x - y`:
+
+**Forma 1: Com `if-then-else` aninhado**
+```haskell
+sig1 :: Int -> Int -> Int
+sig1 x y = if x > y then 1
+           else if x < y then -1
+           else 0
+```
+Problema: Muitos `else if`, difícil de ler
+
+**Forma 2: Com guardas (testando todas as condições)**
+```haskell
+sig2 :: Int -> Int -> Int
+sig2 x y | x > y  = 1
+         | x < y  = -1
+         | x == y = 0
+```
+Melhor: Cada condição em sua linha, claro
+
+**Forma 3: Com guardas e `otherwise`**
+```haskell
+sig3 :: Int -> Int -> Int
+sig3 x y
+    | x > y     = 1
+    | x < y     = -1
+    | otherwise = 0
+```
+Melhor ainda: `otherwise` deixa claro o caso padrão
+
+### Como Funcionam as Guardas
+
+As guardas são testadas **de cima para baixo**, similar ao pattern matching:
+
+```haskell
+sig3 5 3
+-- Testa 1ª guarda: 5 > 3? ✓ True
+-- Usa esta equação: retorna 1
+⇒ 1
+
+sig3 2 8
+-- Testa 1ª guarda: 2 > 8? ✗ False
+-- Testa 2ª guarda: 2 < 8? ✓ True
+-- Usa esta equação: retorna -1
+⇒ -1
+
+sig3 4 4
+-- Testa 1ª guarda: 4 > 4? ✗ False
+-- Testa 2ª guarda: 4 < 4? ✗ False
+-- Testa 3ª guarda: otherwise? ✓ True (sempre)
+-- Usa esta equação: retorna 0
+⇒ 0
+```
+
+### O que é `otherwise`?
+
+`otherwise` é simplesmente um **sinônimo** para `True`, definido no Prelude:
+
+```haskell
+otherwise :: Bool
+otherwise = True
+```
+
+Poderia usar `True` diretamente, mas `otherwise` é mais legível:
+
+```haskell
+-- Funcionalmente equivalente, mas otherwise é mais claro
+func1 x | x > 0     = "positivo"
+        | otherwise = "não positivo"
+
+func2 x | x > 0 = "positivo"
+        | True  = "não positivo"  -- menos idiomático
+```
+
+### Guardas vs Pattern Matching
+
+**Pattern Matching**: Testa a **estrutura** dos dados
+```haskell
+descreve :: [a] -> String
+descreve []     = "vazia"       -- padrão: lista vazia
+descreve [x]    = "um elemento" -- padrão: lista com 1 elemento
+descreve _      = "vários"      -- padrão: qualquer outra
+```
+
+**Guardas**: Testa **condições booleanas**
+```haskell
+classifica :: Int -> String
+classifica nota
+    | nota >= 9 = "Excelente"   -- condição numérica
+    | nota >= 7 = "Bom"
+    | nota >= 5 = "Suficiente"
+    | otherwise = "Insuficiente"
+```
+
+### Combinando Pattern Matching com Guardas
+
+Você pode usar **ambos juntos** - pattern matching nos argumentos e guardas no corpo:
+
+```haskell
+-- Pattern matching + guardas
+processaLista :: [Int] -> String
+processaLista []     = "lista vazia"              -- pattern matching
+processaLista (x:xs)                              -- pattern matching
+    | x > 0     = "começa positivo"               -- guarda
+    | x < 0     = "começa negativo"               -- guarda
+    | otherwise = "começa com zero"               -- guarda
+```
+
+**Outro exemplo:**
+```haskell
+compara :: (Int, Int) -> String
+compara (x, y)                    -- pattern matching na tupla
+    | x > y     = "primeiro maior"
+    | x < y     = "segundo maior"
+    | otherwise = "iguais"
+```
+
+### Mais Exemplos com Guardas
+
+```haskell
+-- IMC (Índice de Massa Corporal)
+imc :: Float -> Float -> String
+imc peso altura
+    | resultado < 18.5 = "Abaixo do peso"
+    | resultado < 25.0 = "Peso normal"
+    | resultado < 30.0 = "Sobrepeso"
+    | otherwise        = "Obesidade"
+    where resultado = peso / (altura ^ 2)
+
+-- Máximo de três números
+max3 :: Int -> Int -> Int -> Int
+max3 a b c
+    | a >= b && a >= c = a
+    | b >= c           = b
+    | otherwise        = c
+
+-- Preço com desconto
+precoFinal :: Float -> Float
+precoFinal preco
+    | preco > 1000  = preco * 0.85  -- 15% desconto
+    | preco > 500   = preco * 0.90  -- 10% desconto
+    | preco > 100   = preco * 0.95  -- 5% desconto
+    | otherwise     = preco         -- sem desconto
+```
+
+### Quando Usar Guardas vs Pattern Matching?
+
+| Use Pattern Matching quando: | Use Guardas quando: |
+|------------------------------|---------------------|
+| Testar **estrutura** de dados | Testar **condições numéricas** |
+| Distinguir por **construtores** (`[]`, `(:)`, tuplas) | Comparar valores (`>`, `<`, `==`) |
+| Extrair componentes de estruturas | Testar **múltiplas condições booleanas** |
+| Casos baseados em **valores literais** | Lógica com **expressões booleanas complexas** |
+
+**Dica**: Muitas vezes você usará **ambos** na mesma função!
+
+## 5. Listas: Construtores e Padrões
 
 ### Os Dois Construtores de Listas
 
@@ -496,7 +749,7 @@ segundo [10, 20, 30]
 ⇒ 20
 ```
 
-## 5. Funções Recursivas sobre Listas
+## 6. Funções Recursivas sobre Listas
 
 ### Estratégia de Definição
 
@@ -681,7 +934,7 @@ funcao (x:xs) = combinar x (funcao xs)  -- Como combinar x com o resultado do re
 | `concat` | `[]` | `x ++ (concat xs)` |
 
 
-## 6. Tipos Sinónimos (Type Aliases)
+## 7. Tipos Sinónimos (Type Aliases)
 
 ### O que são Tipos Sinónimos?
 
@@ -898,7 +1151,7 @@ newtype Idade = MkIdade Int
 -- Idade é diferente de Int, mas mesma representação em runtime
 ```
 
-## 7. Revisão: `where` e `let...in` (Definições Locais)
+## 8. Revisão: `where` e `let...in` (Definições Locais)
 
 ### Cláusula `where`
 
