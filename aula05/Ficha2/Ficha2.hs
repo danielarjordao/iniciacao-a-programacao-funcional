@@ -149,16 +149,3 @@ raizesLet (a,b,c) =
         r1 = (-b + r) / (2*a)
         r2 = (-b - r) / (2*a)
     in (r1,r2)
-
--- Versão sem guardas: calcula diretamente (assume d >= 0)
-raizesSemGuardas :: (Double,Double,Double) -> (Double,Double)
-raizesSemGuardas (a,b,c) = (r1, r2)
-    where r1 = (-b + sqrt d) / (2*a)
-          r2 = (-b - sqrt d) / (2*a)
-          d = b^2 - 4*a*c
-
--- Versão compacta: tudo inline, sem definições locais
-raizesCompacta :: (Double,Double,Double) -> (Double,Double)
-raizesCompacta (a,b,c) =
-    ( (-b + sqrt (b^2 - 4*a*c)) / (2*a),
-      (-b - sqrt (b^2 - 4*a*c)) / (2*a) )

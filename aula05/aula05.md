@@ -37,6 +37,7 @@ True                 -- constante booleana
 [x]                  -- lista com exatamente um elemento
 [x, y]               -- lista com exatamente dois elementos
 [x, 'A', y]          -- lista com 3 elementos: qualquer, 'A', qualquer
+-- Por ser uma lista, todos os elementos devem ser do mesmo tipo, no exemplo acima x e y devem ser Char
 (x:xs)               -- lista não vazia: cabeça x, cauda xs
 (h:t)                -- mesma ideia: head h, tail t
 
