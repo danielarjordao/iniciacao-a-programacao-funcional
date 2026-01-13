@@ -109,7 +109,7 @@ runghc aula01/Main.hs
 - Pattern matching
 - Recursividade como mecanismo principal de repetição
 
-## 🎯 Estrutura de Aprendizado
+## Estrutura de Aprendizado
 
 Recomenda-se estudar na seguinte ordem:
 
